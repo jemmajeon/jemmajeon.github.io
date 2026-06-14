@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jemmajeon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fafaf8;--surface:#fff;--ink:#111;--ink-2:#444;--muted:#888;
+  --line:#e8e6e1;--primary:#1a1a2e;--accent:#e8602c;
+  --radius:10px;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;}
+body{display:flex;align-items:center;justify-content:center;}
+.container{max-width:560px;padding:40px 24px;text-align:center;}
+h1{font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
+h1 em{color:var(--accent);font-style:normal;}
+.desc{font-size:17px;color:var(--ink-2);margin-bottom:40px;line-height:1.7;}
+.links{display:flex;flex-direction:column;gap:12px;}
+a{
+  padding:16px 24px;border:1px solid var(--line);border-radius:6px;
+  text-decoration:none;color:var(--ink);font-weight:600;font-size:15px;
+  transition:background .2s,border-color .2s;
+}
+a:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
+a.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+a.primary:hover{background:#2a2a3e;}
+.meta{margin-top:60px;font-size:12px;color:var(--muted);}
+</style>
+<script>
+// 리다이렉트 (5초 후)
+setTimeout(function(){
+  // window.location.href = 'https://jemmajeon.github.io/blog/';
+}, 5000);
+</script>
+</head>
+<body>
+
+<div class="container">
+  <h1>안녕하세요,<br><em>젬코리</em>입니다</h1>
+
+  <p class="desc">
+    개발, 자동화, 기록을 좋아합니다.<br>
+    프로젝트와 생각들을 정리하는 공간입니다.
+  </p>
+
+  <div class="links">
+    <a href="/blog/" class="primary">📝 블로그 보기</a>
+    <a href="/blog/restaurant/nakseongdae-complete.html">🍽️ 맛집 가이드</a>
+    <a href="https://github.com/jemmajeon" target="_blank">💻 GitHub</a>
+    <a href="https://jemmajeon.github.io/wedding_2026/" target="_blank">💍 결혼 준비</a>
+  </div>
+
+  <div class="meta">
+    © 2024 jemmajeon ·
+    <a href="https://github.com/jemmajeon" style="color:var(--muted);text-decoration:none;">@github</a>
+  </div>
+</div>
+
+</body>
+</html>

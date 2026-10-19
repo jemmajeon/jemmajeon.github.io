@@ -15,7 +15,7 @@
   --radius:10px;
 }
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;}
-body{display:flex;align-items:center;justify-content:center;}
+body{display:flex;align-items:center;justify-content:center;min-height:100%;height:auto;}
 .container{max-width:560px;padding:40px 24px;text-align:center;}
 h1{font-size:clamp(32px,5vw,48px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;}
 h1 em{color:var(--accent);font-style:normal;}
@@ -29,6 +29,12 @@ a{
 a:hover{background:var(--surface);border-color:var(--accent);color:var(--accent);}
 a.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
 a.primary:hover{background:#2a2a3e;}
+.section{margin-top:40px;text-align:left;}
+.section h2{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:12px;}
+.section .links a{display:flex;flex-direction:column;gap:2px;}
+.section .links small{font-weight:400;font-size:13px;color:var(--muted);}
+.locked{padding:16px 24px;border:1px dashed var(--line);border-radius:6px;color:var(--ink-2);font-weight:600;font-size:15px;display:flex;flex-direction:column;gap:2px;}
+.locked small{font-weight:400;font-size:13px;color:var(--muted);}
 .meta{margin-top:60px;font-size:12px;color:var(--muted);}
 </style>
 <script>
@@ -52,6 +58,18 @@ setTimeout(function(){
     <a href="https://jemmajeon.github.io/blog/" class="primary">📝 블로그 보기</a>
     <a href="https://github.com/jemmajeon" target="_blank">💻 GitHub</a>
     <a href="https://jemmajeon.github.io/travel-2026/" target="_blank">🌺 하와이 여행</a>
+  </div>
+
+  <div class="section">
+    <h2>프로젝트 대시보드</h2>
+    <div class="links">
+      <a href="https://jemmajeon.github.io/ai-venue-tracker_PB/" target="_blank">📈 AI 게재처 트래커
+        <small>중국 AI 권위 게재처 논문을 매일 수집해 주제·키워드(중·영·한)로 분류</small></a>
+      <a href="https://jemmajeon.github.io/2026-10_PB/" target="_blank">🗂️ 2026년 10월 작업
+        <small>이번 달 받은 자료와 만든 템플릿 현황</small></a>
+      <div class="locked">🔒 연구 관제
+        <small>공동 연구자 전용 · 비공개</small></div>
+    </div>
   </div>
 
   <div class="meta">

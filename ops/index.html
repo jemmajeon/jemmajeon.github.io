@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>자동화 통합 관제</title>
+<style>
+/* 각 _PB 사본이 내보내는 status.json을 모아 한 화면에 누적으로 보여준다. 공개 정보(성공/실패·시각·요약)만 다룬다. */
+:root{--page:#f9f9f7;--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--base:#c3c2b7;--ring:rgba(11,11,11,.10);
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--okbg:#d9f0d9;--okfg:#006300;--ok:#0ca30c;--badbg:#f8dcdc;--badfg:#a12828;--bad:#d03b3b;--empty:#efeee9;--tipbg:#0b0b0b;--tipfg:#f0efec;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--base:#383835;--ring:rgba(255,255,255,.10);
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--okbg:#173a17;--okfg:#4fd14f;--badbg:#4a1d1d;--badfg:#ff8a8a;--empty:#232321;--tipbg:#f0efec;--tipfg:#0b0b0b;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#0d0d0d;--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--base:#383835;--ring:rgba(255,255,255,.10);
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--okbg:#173a17;--okfg:#4fd14f;--badbg:#4a1d1d;--badfg:#ff8a8a;--empty:#232321;--tipbg:#f0efec;--tipfg:#0b0b0b;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:1160px;margin:0 auto;padding:36px max(16px,env(safe-area-inset-right,0px)) 64px max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px 24px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--muted)}
+.eyebrow a{color:inherit;text-decoration:none}
+h1{margin:4px 0;font-size:28px}
+.sub{margin:0;color:var(--ink2);max-width:64ch}
+.stamp{font-size:13px;color:var(--muted);text-align:right}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:18px 20px;min-width:0}
+.card h2{margin:0;font-size:15px}
+.cap{margin:2px 0 14px;font-size:13px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .l{font-size:13px;color:var(--ink2)}
+.kpi .v{font-size:30px;font-weight:700;margin:2px 0}
+.kpi .v small{font-size:15px;color:var(--ink2);margin-left:2px}
+.kpi .d{font-size:12px;color:var(--muted)}
+.sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.src{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink)}
+a.src:hover{border-color:var(--s1)}
+.src .top{display:flex;align-items:center;gap:8px;font-weight:700}
+.src .sw{width:10px;height:10px;border-radius:2px;flex:none}
+.src .meta{font-size:13px;color:var(--ink2)}
+.src .go{font-size:13px;font-weight:600;color:var(--s1);margin-top:auto}
+.st{font-size:12px;font-weight:600;white-space:nowrap}
+.st.ok{color:var(--okfg)}.st.bad{color:var(--badfg)}.st.idle{color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters .lab{font-size:13px;color:var(--muted)}
+.seg{font:600 13px/1 inherit;font-family:inherit;color:var(--ink2);background:var(--surface);border:1px solid var(--ring);border-radius:999px;padding:7px 14px;cursor:pointer}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+.seg:focus-visible,[data-tip]:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+.scroll{overflow-x:auto}
+.grid{border-collapse:separate;border-spacing:3px;font-size:12px;min-width:900px;width:100%}
+.grid thead th{font-weight:500;color:var(--muted);text-align:center;line-height:1.15;font-size:10px}
+.grid thead th:first-child{text-align:left}
+.grid th[scope=row]{text-align:left;font-weight:400;padding-right:8px;white-space:nowrap}
+.grid th[scope=row] b{font-size:13px;font-weight:600}
+.grid th[scope=row] small{display:block;font-size:11px;color:var(--muted)}
+.grid tr.grp th{text-align:left;padding:12px 0 2px;font-size:12px;font-weight:700;color:var(--ink2)}
+.grid tr.grp i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.grid td{height:22px;min-width:18px;border-radius:3px;text-align:center;font-weight:700;font-size:11px;outline:none}
+.c0{background:var(--empty)}.cs{background:var(--okbg)}.cf{background:var(--badbg);color:var(--badfg)}
+.grid td:hover,.grid td:focus{box-shadow:0 0 0 2px var(--ink) inset}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink2);margin:-6px 0 10px}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.key i{width:12px;height:12px;border-radius:3px;display:inline-block}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.gl{stroke:var(--grid)}.bl{stroke:var(--base)}
+.tick{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.feed{width:100%;border-collapse:collapse;font-size:13px}
+.feed th,.feed td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--grid);vertical-align:top}
+.feed th{color:var(--muted);font-weight:600;white-space:nowrap}
+.feed td.n{white-space:nowrap;font-variant-numeric:tabular-nums}
+.feed .tag{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.feed .tag i{width:8px;height:8px;border-radius:2px}
+.feed a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--grid)}
+.more{font:600 13px inherit;font-family:inherit;margin-top:12px;background:none;border:1px solid var(--ring);border-radius:8px;padding:8px 14px;color:var(--ink2);cursor:pointer}
+.empty{color:var(--muted);font-size:14px}
+footer{color:var(--muted);font-size:12px;line-height:1.7}
+#tip{position:fixed;pointer-events:none;z-index:10;background:var(--tipbg);color:var(--tipfg);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.45;max-width:260px}
+#tip b{display:block;font-size:14px}#tip span{opacity:.75}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow"><a href="../">jemmajeon</a> · OPS</div>
+      <h1>자동화 통합 관제</h1>
+      <p class="sub">Slack·텔레그램으로 흩어져 나가던 자동화 결과를 한곳에 모았습니다. 자동화마다 언제 돌았고 성공했는지, 무엇을 보냈는지를 누적으로 보여줍니다.</p>
+    </div>
+    <div class="stamp" id="stamp">불러오는 중…</div>
+  </header>
+
+  <section class="kpis" aria-label="전체 요약">
+    <div class="card kpi"><div class="l">연결된 자동화</div><div class="v" id="k-auto">–</div><div class="d" id="k-auto-d"></div></div>
+    <div class="card kpi"><div class="l">7일 성공률</div><div class="v" id="k-rate">–</div><div class="d" id="k-rate-d"></div></div>
+    <div class="card kpi"><div class="l">오늘 실행</div><div class="v" id="k-today">–</div><div class="d" id="k-today-d"></div></div>
+    <div class="card kpi"><div class="l">누적 발송</div><div class="v" id="k-sends">–</div><div class="d" id="k-sends-d"></div></div>
+    <div class="card kpi"><div class="l">마지막 실패</div><div class="v" id="k-fail" style="font-size:16px;line-height:1.35;margin-top:8px">–</div><div class="d">전체 자동화 기준</div></div>
+  </section>
+
+  <section aria-label="연결된 프로젝트"><div class="sources" id="sources"></div></section>
+
+  <div class="filters" role="group" aria-label="기간"><span class="lab">기간</span>
+    <button type="button" class="seg" data-days="14" aria-pressed="false">14일</button>
+    <button type="button" class="seg" data-days="30" aria-pressed="true">30일</button>
+    <button type="button" class="seg" data-days="90" aria-pressed="false">90일</button>
+  </div>
+
+  <section class="card">
+    <h2>자동화별 실행 기록</h2>
+    <p class="cap">칸 하나가 하루 · 칸에 올리면 성공/실패 횟수</p>
+    <div class="key"><span><i class="cs"></i>모두 성공</span><span><i class="cf"></i>실패 있음 (숫자 = 실패 횟수)</span><span><i class="c0"></i>실행 없음</span></div>
+    <div class="scroll" id="grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>일별 발송 수</h2>
+    <p class="cap">프로젝트별로 쌓음 · 막대에 올리면 상세</p>
+    <div class="key" id="send-key"></div>
+    <div id="sendchart"></div>
+  </section>
+
+  <section class="card">
+    <h2>발송 기록 (누적)</h2>
+    <p class="cap">모든 프로젝트의 보고·알림을 최신순으로 · 키움은 종목 내용 없이 발송 여부만</p>
+    <div class="filters" role="group" aria-label="프로젝트 선택" id="feed-filter" style="margin-bottom:10px"></div>
+    <div class="scroll"><table class="feed"><thead><tr><th>날짜·시각</th><th>프로젝트</th><th>보고</th><th>채널</th><th>요약</th></tr></thead><tbody id="feed"></tbody></table></div>
+    <button type="button" class="more" id="more" hidden>더 보기</button>
+  </section>
+
+  <footer>각 프로젝트의 공개 사본(_PB)이 내보내는 status.json을 읽습니다. GitHub Actions 기록 보존 기간 때문에 실행 기록은 최대 90일까지입니다. 새 프로젝트는 아래 SOURCES 목록에 추가합니다.</footer>
+</main>
+<div id="tip" hidden></div>
+<script>
+// 새 프로젝트를 연결하려면 여기에 한 줄 추가 (status.json을 내보내는 _PB)
+var SOURCES = [
+  {path: "../ai-venue-tracker_PB/status.json", color: "--s1"},
+  {path: "../kiwoom-api_PB/status.json", color: "--s2"}
+];
+
+var state = {days: 30, data: [], feedSrc: "all", feedShown: 30};
+var $ = function (id) { return document.getElementById(id); };
+function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+function kstDate(d) { return new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10); }
+function dayList(n) { var out = [], now = new Date(); for (var i = n - 1; i >= 0; i--) out.push(kstDate(new Date(now.getTime() - i * 864e5))); return out; }
+function fmt(at) { if (!at) return "-"; return at.length > 10 ? at.slice(5, 10).replace("-", "/") + " " + at.slice(11, 16) : at.slice(5).replace("-", "/"); }
+function tipAttr(node, text) { node.setAttribute("data-tip", text); node.tabIndex = 0; }
+
+function load() {
+  return Promise.all(SOURCES.map(function (s) {
+    return fetch(s.path, {cache: "no-store"}).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return {cfg: s, json: j}; }, function () { return {cfg: s, json: null}; });
+  }));
+}
+
+function render() {
+  var days = dayList(state.days), today = days[days.length - 1], week = dayList(7);
+  var live = state.data.filter(function (d) { return d.json; });
+  var autos = 0, ok7 = 0, fail7 = 0, okT = 0, failT = 0, lastFail = null, sends = 0, sendsT = 0;
+  live.forEach(function (d) {
+    d.json.automations.forEach(function (a) {
+      autos++;
+      Object.keys(a.days || {}).forEach(function (k) {
+        var c = a.days[k];
+        if (week.indexOf(k) >= 0) { ok7 += c[0]; fail7 += c[1]; }
+        if (k === today) { okT += c[0]; failT += c[1]; }
+        if (c[1] && (!lastFail || k > lastFail.day)) lastFail = {day: k, label: d.json.title + " · " + a.label};
+      });
+    });
+    sends += d.json.sends.length;
+    sendsT += d.json.sends.filter(function (s) { return s.at.slice(0, 10) === today; }).length;
+  });
+  $("k-auto").textContent = autos; $("k-auto-d").textContent = live.length + "개 프로젝트";
+  $("k-rate").innerHTML = ""; $("k-rate").append(String(ok7 + fail7 ? Math.round(ok7 / (ok7 + fail7) * 100) : 0), el("small", null, "%"));
+  $("k-rate-d").textContent = (ok7 + fail7) + "회 중 실패 " + fail7 + "회";
+  $("k-today").innerHTML = ""; $("k-today").append(String(okT + failT), el("small", null, "회"));
+  $("k-today-d").textContent = "실패 " + failT + "회";
+  $("k-sends").innerHTML = ""; $("k-sends").append(String(sends), el("small", null, "건"));
+  $("k-sends-d").textContent = "오늘 " + sendsT + "건";
+  $("k-fail").textContent = lastFail ? lastFail.day.slice(5).replace("-", "/") + " · " + lastFail.label : "최근 기록 없음";
+  var ups = live.map(function (d) { return d.json.updated; }).sort();
+  $("stamp").textContent = ups.length ? "가장 오래된 갱신 " + fmt(ups[0]) + " KST" : "연결된 데이터 없음";
+
+  // 프로젝트 카드
+  var src = $("sources"); src.replaceChildren();
+  state.data.forEach(function (d) {
+    var card;
+    if (!d.json) {
+      card = el("div", "card src");
+      var t = el("div", "top"); var sw = el("i", "sw"); sw.style.background = "var(" + d.cfg.color + ")";
+      t.append(sw, d.cfg.path.split("/")[1]); card.append(t, el("div", "meta", "아직 공개 사본이 없거나 갱신 전입니다."));
+    } else {
+      var j = d.json, fails = 0, lastAt = "";
+      j.automations.forEach(function (a) { if (a.last && a.last.at > lastAt) lastAt = a.last.at; week.forEach(function (k) { fails += ((a.days || {})[k] || [0, 0])[1]; }); });
+      card = el("a", "card src"); card.href = j.page;
+      var top = el("div", "top"); var sw2 = el("i", "sw"); sw2.style.background = "var(" + d.cfg.color + ")";
+      top.append(sw2, j.title);
+      var stt = el("span", "st " + (fails ? "bad" : "ok"), fails ? "✕ 7일 실패 " + fails : "✓ 7일 이상 없음");
+      card.append(top, stt, el("div", "meta", "자동화 " + j.automations.length + "개 · " + j.channel + " · 마지막 실행 " + fmt(lastAt)), el("span", "go", "상세 보기 →"));
+    }
+    src.append(card);
+  });
+
+  // 실행 격자
+  var tbl = el("table", "grid"), thead = el("thead"), hr = el("tr");
+  hr.append(el("th", null, "자동화"));
+  days.forEach(function (k, i) { var th = el("th"); if (state.days <= 30 || i % 3 === 0) th.textContent = Number(k.slice(8)) + ""; hr.append(th); });
+  thead.append(hr); tbl.append(thead);
+  var tb = el("tbody");
+  live.forEach(function (d) {
+    var g = el("tr", "grp"), gh = el("th"); gh.colSpan = days.length + 1;
+    var gi = el("i"); gi.style.background = "var(" + d.cfg.color + ")"; gh.append(gi, d.json.title); g.append(gh); tb.append(g);
+    d.json.automations.forEach(function (a) {
+      var tr = el("tr"), th = el("th"); th.scope = "row"; th.append(el("b", null, a.label), el("small", null, a.schedule)); tr.append(th);
+      days.forEach(function (k) {
+        var c = (a.days || {})[k], td = el("td", !c ? "c0" : c[1] ? "cf" : "cs", c && c[1] ? String(c[1]) : "");
+        tipAttr(td, a.label + " · " + k.slice(5).replace("-", "/") + "|" + (!c ? "실행 없음" : "성공 " + c[0] + " · 실패 " + c[1]) + "|" + d.json.title);
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+  });
+  tbl.append(tb); $("grid").replaceChildren(live.length ? tbl : el("p", "empty", "아직 연결된 데이터가 없습니다."));
+
+  // 일별 발송 막대 (프로젝트별 누적)
+  var key = $("send-key"); key.replaceChildren();
+  live.forEach(function (d) { var s = el("span"), i = el("i"); i.style.background = "var(" + d.cfg.color + ")"; s.append(i, d.json.title); key.append(s); });
+  var per = days.map(function (k) { return live.map(function (d) { return d.json.sends.filter(function (s) { return s.at.slice(0, 10) === k; }).length; }); });
+  var W = 640, H = 180, L = 30, R = 6, T = 10, B = 26, pw = W - L - R, ph = H - T - B;
+  var peak = Math.max.apply(null, per.map(function (v) { return v.reduce(function (a, b) { return a + b; }, 0); }).concat([1]));
+  var top = Math.max(5, Math.ceil(peak / 5) * 5), slot = pw / days.length, bw = Math.min(22, slot * 0.6);
+  var y = function (v) { return T + ph - v / top * ph; };
+  var NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "일별 발송 수");
+  function mk(tag, attrs) { var n = document.createElementNS(NS, tag); for (var a in attrs) n.setAttribute(a, attrs[a]); return n; }
+  [0, top / 2, top].forEach(function (v) { svg.append(mk("line", {"class": "gl", x1: L, x2: W - R, y1: y(v), y2: y(v)})); var t = mk("text", {"class": "tick", x: L - 6, y: y(v) + 4, "text-anchor": "end"}); t.textContent = v; svg.append(t); });
+  days.forEach(function (k, i) {
+    var cx = L + slot * i + slot / 2, acc = 0;
+    per[i].forEach(function (n, si) {
+      if (!n) return;
+      var r = mk("rect", {x: cx - bw / 2, y: y(acc + n) + (acc ? 0 : 0), width: bw, height: Math.max(ph - (y(n) - T) - (acc ? 2 : 0), 1), rx: 2});
+      r.style.fill = "var(" + live[si].cfg.color + ")"; svg.append(r); acc += n;
+    });
+    var hit = mk("rect", {x: cx - slot / 2, y: T, width: slot, height: ph, fill: "transparent"});
+    tipAttr(hit, k.slice(5).replace("-", "/") + "|발송 " + acc + "건|" + live.map(function (d, si) { return d.json.title + " " + per[i][si]; }).join(" · "));
+    svg.append(hit);
+    if (state.days <= 14 || i % Math.ceil(state.days / 15) === 0) { var t = mk("text", {"class": "tick", x: cx, y: H - 8, "text-anchor": "middle"}); t.textContent = k.slice(5).replace("-", "/"); svg.append(t); }
+  });
+  svg.append(mk("line", {"class": "bl", x1: L, x2: W - R, y1: T + ph, y2: T + ph}));
+  $("sendchart").replaceChildren(svg);
+
+  renderFeed();
+}
+
+function renderFeed() {
+  var live = state.data.filter(function (d) { return d.json; });
+  var ff = $("feed-filter"); ff.replaceChildren();
+  [{id: "all", title: "전체"}].concat(live.map(function (d) { return {id: d.json.source, title: d.json.title}; })).forEach(function (o) {
+    var b = el("button", "seg", o.title); b.type = "button"; b.setAttribute("aria-pressed", state.feedSrc === o.id);
+    b.onclick = function () { state.feedSrc = o.id; state.feedShown = 30; renderFeed(); }; ff.append(b);
+  });
+  var rows = [];
+  live.forEach(function (d) { if (state.feedSrc === "all" || state.feedSrc === d.json.source) d.json.sends.forEach(function (s) { rows.push({s: s, d: d}); }); });
+  rows.sort(function (a, b) { return a.s.at < b.s.at ? 1 : -1; });
+  var tb = $("feed"); tb.replaceChildren();
+  rows.slice(0, state.feedShown).forEach(function (r) {
+    var tr = el("tr"), tag = el("span", "tag"), i = el("i"); i.style.background = "var(" + r.d.cfg.color + ")"; tag.append(i, r.d.json.title);
+    var lab = el("td"); if (r.s.link) { var a = el("a", null, r.s.label); a.href = r.s.link; lab.append(a); } else lab.textContent = r.s.label;
+    var td2 = el("td"); td2.append(tag);
+    tr.append(el("td", "n", fmt(r.s.at)), td2, lab, el("td", null, r.s.channel), el("td", null, r.s.summary));
+    tb.append(tr);
+  });
+  if (!rows.length) { var tr = el("tr"), td = el("td", "empty", "발송 기록이 없습니다."); td.colSpan = 5; tr.append(td); tb.append(tr); }
+  $("more").hidden = rows.length <= state.feedShown;
+}
+$("more").onclick = function () { state.feedShown += 100; renderFeed(); };
+document.querySelectorAll("[data-days]").forEach(function (b) {
+  b.onclick = function () { state.days = Number(b.getAttribute("data-days")); document.querySelectorAll("[data-days]").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); render(); };
+});
+
+(function () {
+  var tip = $("tip");
+  function show(n, x, y) { var p = n.getAttribute("data-tip").split("|"); tip.replaceChildren(); var b = el("b", null, p[1]); tip.append(b); if (p[2]) tip.append(el("div", null, p[2])); tip.append(el("span", null, p[0])); tip.hidden = false;
+    var r = tip.getBoundingClientRect(), px = Math.min(x + 14, innerWidth - r.width - 8), py = y - r.height - 12; if (py < 8) py = y + 18; tip.style.left = Math.max(8, px) + "px"; tip.style.top = py + "px"; }
+  document.addEventListener("pointermove", function (e) { var n = e.target.closest && e.target.closest("[data-tip]"); if (n) show(n, e.clientX, e.clientY); else tip.hidden = true; });
+  document.addEventListener("focusin", function (e) { var n = e.target.closest && e.target.closest("[data-tip]"); if (!n) return; var r = n.getBoundingClientRect(); show(n, r.left + r.width / 2, r.top); });
+  document.addEventListener("focusout", function () { tip.hidden = true; });
+  document.addEventListener("scroll", function () { tip.hidden = true; }, {passive: true});
+})();
+
+load().then(function (d) { state.data = d; render(); });
+</script>
+</body>
+</html>

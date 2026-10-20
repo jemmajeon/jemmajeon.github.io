@@ -21,12 +21,14 @@
 
   function home(d) {
     var pf = d.profile;
-    document.getElementById("headline").textContent = pf.headline;
+    var hl = document.getElementById("headline"); hl.replaceChildren();
+    pf.headline.split(/(\[[^\]]+\])/).forEach(function (s) { if (/^\[/.test(s)) hl.append(el("mark", null, s.slice(1, -1))); else if (s) hl.append(s); });
     document.getElementById("intro-text").textContent = pf.intro;
     var links = document.getElementById("links");
     pf.links.forEach(function (l) { var a = el("a"); a.href = l.url; if (/^http/.test(l.url) && l.url.indexOf("jemmajeon.github.io") < 0) { a.target = "_blank"; a.rel = "noopener"; } a.append(el("b", null, l.label + " →"), el("span", null, l.note)); links.append(a); });
     var th = document.getElementById("themes");
-    d.themes.forEach(function (t, i) { var row = el("div", "theme"); row.append(el("span", "n", "0" + (i + 1)), el("b", null, t.title), el("p", null, t.text)); th.append(row); });
+    th.append(el("div", "th-hd", "제가 좋아하는 개발은요"));
+    d.themes.forEach(function (t) { var row = el("div", "theme"); row.append(el("span", "n", "👉"), el("b", null, t.title), el("p", null, t.text)); th.append(row); });
 
     var state = {cat: "전체", shown: 8};
     var f = document.getElementById("filters");
@@ -63,6 +65,7 @@
     more.onclick = function () { track("archive_more", {shown: state.shown}); state.shown += 20; tlRender(); };
     tlRender();
     document.getElementById("updated").textContent = "갱신 " + fmt(d.updated);
+    if (pf.signoff) document.getElementById("bye").textContent = pf.signoff;
   }
 
   function project(d) {

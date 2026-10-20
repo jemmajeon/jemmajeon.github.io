@@ -7,7 +7,7 @@
 <meta name="description" content="흩어진 정보를 한 화면에 모으는 대시보드·웹 도구와 소설 집필 작업을 모아 둔 jemmajeon의 홈페이지.">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/home.css">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LTC8L11Y7J"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LTC8L11Y7J',{site_section:'home'});</script>
@@ -18,7 +18,7 @@
 <main class="wrap">
   <section class="intro" aria-labelledby="headline">
     <div>
-      <span class="label">jemmajeon — builder · writer</span>
+      <span class="label">👋 안녕하세요, jemmajeon이에요</span>
       <h1 id="headline">흩어진 정보를 한 화면에 모으는 걸 좋아합니다</h1>
       <p id="intro-text"></p>
       <div class="links" id="links" data-zone="intro"></div>
@@ -27,17 +27,17 @@
   </section>
 
   <section class="sec" id="projects" aria-labelledby="pj-h">
-    <div class="sec-hd"><h2 id="pj-h">프로젝트</h2><div class="filters" id="filters" role="group" aria-label="분류"></div></div>
+    <div class="sec-hd"><h2 id="pj-h">프로젝트 <small>만든 것, 쓰는 것</small></h2><div class="filters" id="filters" role="group" aria-label="분류"></div></div>
     <div class="projects" id="projects-grid"></div>
   </section>
 
   <section class="sec" id="archive" data-zone="archive" aria-labelledby="ar-h">
-    <div class="sec-hd"><h2 id="ar-h">작업 아카이브</h2><span class="sub" id="archive-count"></span></div>
+    <div class="sec-hd"><h2 id="ar-h">작업 아카이브 <small>그동안 한 일</small></h2><span class="sub" id="archive-count"></span></div>
     <ol class="timeline" id="timeline"></ol>
     <button type="button" class="more" id="more" hidden>더 보기</button>
   </section>
 
-  <footer><span>© jemmajeon</span><span id="updated"></span></footer>
+  <footer><span class="bye" id="bye"></span><span><span id="updated"></span> · © jemmajeon</span></footer>
 </main>
 <script src="assets/track.js"></script>
 <script src="assets/home.js"></script>

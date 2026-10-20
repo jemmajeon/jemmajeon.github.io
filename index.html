@@ -9,16 +9,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="assets/home.css">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LTC8L11Y7J"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LTC8L11Y7J',{site_section:'home'});</script>
+
 </head>
 <body data-page="home">
-<header class="wrap top"><a class="name" href="./">jemmajeon</a><nav aria-label="사이트"><a href="./#projects">프로젝트</a><a href="./#archive">아카이브</a><a href="https://jemmajeon.github.io/blog/">블로그</a><a href="https://github.com/jemmajeon" target="_blank" rel="noopener">GitHub</a></nav></header>
+<header class="wrap top" data-zone="topnav"><a class="name" href="./">jemmajeon</a><nav aria-label="사이트"><a href="./#projects">프로젝트</a><a href="./#archive">아카이브</a><a href="https://jemmajeon.github.io/blog/">블로그</a><a href="https://github.com/jemmajeon" target="_blank" rel="noopener">GitHub</a></nav></header>
 <main class="wrap">
   <section class="intro" aria-labelledby="headline">
     <div>
       <span class="label">jemmajeon — builder · writer</span>
       <h1 id="headline">흩어진 정보를 한 화면에 모으는 걸 좋아합니다</h1>
       <p id="intro-text"></p>
-      <div class="links" id="links"></div>
+      <div class="links" id="links" data-zone="intro"></div>
     </div>
     <div class="themes" id="themes" aria-label="좋아하는 개발"></div>
   </section>
@@ -28,7 +31,7 @@
     <div class="projects" id="projects-grid"></div>
   </section>
 
-  <section class="sec" id="archive" aria-labelledby="ar-h">
+  <section class="sec" id="archive" data-zone="archive" aria-labelledby="ar-h">
     <div class="sec-hd"><h2 id="ar-h">작업 아카이브</h2><span class="sub" id="archive-count"></span></div>
     <ol class="timeline" id="timeline"></ol>
     <button type="button" class="more" id="more" hidden>더 보기</button>
@@ -36,6 +39,7 @@
 
   <footer><span>© jemmajeon</span><span id="updated"></span></footer>
 </main>
+<script src="assets/track.js"></script>
 <script src="assets/home.js"></script>
 </body>
 </html>

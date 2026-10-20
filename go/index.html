@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>이동 중… — jemmajeon</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LTC8L11Y7J"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LTC8L11Y7J',{send_page_view:false});</script>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f6f4ef;color:#857f73;font:15px -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}@media (prefers-color-scheme:dark){body{background:#12110e;color:#938b7e}}a{color:inherit}</style>
+</head>
+<body>
+<p id="msg">이동 중…</p>
+<script>
+// 단축 링크 릴레이: /go/?l=<id> → links.json의 목적지로 UTM을 붙여 이동하고, 이동 자체를 link_relay 이벤트로 남긴다.
+(function () {
+  var q = new URLSearchParams(location.search), id = (q.get("l") || "").slice(0, 60), home = location.origin + "/";
+  function go(url, ev) {
+    var done = false, jump = function () { if (!done) { done = true; location.replace(url); } };
+    if (typeof gtag === "function") { ev.event_callback = jump; gtag("event", "link_relay", ev); }
+    setTimeout(jump, 700);
+  }
+  fetch("/links.json", {cache: "no-store"}).then(function (r) { return r.json(); }).then(function (d) {
+    var L = (d.links || []).find(function (x) { return x.id === id; });
+    if (!L) { go(home, {link_id: id || "(none)", link_status: "unknown"}); return; }
+    var dest = new URL(L.dest, location.origin), own = dest.origin === location.origin;
+    if (own) {
+      dest.searchParams.set("utm_source", L.source); dest.searchParams.set("utm_medium", L.medium); dest.searchParams.set("utm_campaign", L.campaign);
+      if (L.content) dest.searchParams.set("utm_content", L.content);
+    }
+    go(dest.toString(), {link_id: L.id, link_status: "ok", relay_source: L.source, relay_medium: L.medium, relay_campaign: L.campaign, relay_content: L.content || "", destination: L.dest});
+  }).catch(function () { location.replace(home); });
+})();
+</script>
+<noscript><a href="/">홈으로 이동</a></noscript>
+</body>
+</html>

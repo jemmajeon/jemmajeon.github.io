@@ -1,0 +1,142 @@
+{
+  "_comment": "공유 링크 원장. 밖으로 내보내는 링크는 전부 여기 등록하고 /go/?l=<id> 로 공유한다. 규칙은 UTM.md. 관리 화면은 /utm/.",
+  "updated": "2026-10-20",
+  "vocab": {
+    "source": {
+      "instagram": "인스타그램",
+      "kakao": "카카오톡",
+      "slack": "슬랙",
+      "github": "깃허브 프로필·README",
+      "naver_blog": "네이버 블로그",
+      "email": "메일 서명·본문",
+      "resume": "이력서·포트폴리오 문서",
+      "qr": "인쇄물 QR",
+      "threads": "스레드",
+      "linkedin": "링크드인",
+      "direct_msg": "1:1 메시지(기타)"
+    },
+    "medium": {
+      "social": "SNS 게시물·프로필",
+      "messenger": "메신저 공유",
+      "referral": "다른 사이트의 링크",
+      "email": "메일",
+      "document": "문서(PDF·이력서)",
+      "print": "인쇄물·오프라인"
+    },
+    "default_medium": {
+      "instagram": "social",
+      "threads": "social",
+      "linkedin": "social",
+      "kakao": "messenger",
+      "slack": "messenger",
+      "direct_msg": "messenger",
+      "github": "referral",
+      "naver_blog": "referral",
+      "email": "email",
+      "resume": "document",
+      "qr": "print"
+    }
+  },
+  "links": [
+    {
+      "id": "home-github",
+      "dest": "/",
+      "source": "github",
+      "medium": "referral",
+      "campaign": "homepage",
+      "content": "profile",
+      "note": "깃허브 프로필 Website 칸 · 프로필 README",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "home-kakao",
+      "dest": "/",
+      "source": "kakao",
+      "medium": "messenger",
+      "campaign": "homepage",
+      "content": "share",
+      "note": "카톡으로 홈페이지 보낼 때",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "home-insta",
+      "dest": "/",
+      "source": "instagram",
+      "medium": "social",
+      "campaign": "homepage",
+      "content": "bio",
+      "note": "인스타 프로필 링크",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "home-resume",
+      "dest": "/",
+      "source": "resume",
+      "medium": "document",
+      "campaign": "homepage",
+      "content": "header",
+      "note": "이력서·포트폴리오 상단 링크",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "home-email",
+      "dest": "/",
+      "source": "email",
+      "medium": "email",
+      "campaign": "homepage",
+      "content": "signature",
+      "note": "메일 서명",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "home-nblog",
+      "dest": "/",
+      "source": "naver_blog",
+      "medium": "referral",
+      "campaign": "homepage",
+      "content": "profile",
+      "note": "네이버 블로그 프로필·글 하단",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "blog-kakao",
+      "dest": "/blog/",
+      "source": "kakao",
+      "medium": "messenger",
+      "campaign": "blog",
+      "content": "share",
+      "note": "블로그 안내서 목록을 카톡으로",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "guides-proj-kakao",
+      "dest": "/project.html?p=guides",
+      "source": "kakao",
+      "medium": "messenger",
+      "campaign": "project-guides",
+      "content": "share",
+      "note": "모임 안내서 프로젝트 소개",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "blog-github",
+      "dest": "/blog/",
+      "source": "github",
+      "medium": "referral",
+      "campaign": "blog",
+      "content": "profile",
+      "note": "깃허브 프로필 README",
+      "created": "2026-10-20"
+    },
+    {
+      "id": "guides-proj-github",
+      "dest": "/project.html?p=guides",
+      "source": "github",
+      "medium": "referral",
+      "campaign": "project-guides",
+      "content": "profile",
+      "note": "깃허브 프로필 README",
+      "created": "2026-10-20"
+    }
+  ]
+}

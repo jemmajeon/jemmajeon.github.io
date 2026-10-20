@@ -1,6 +1,8 @@
 // 홈(index.html)과 프로젝트 페이지(project.html?p=<id>)를 projects.json으로 그린다.
 (function () {
   var page = document.body.getAttribute("data-page");
+  // 이벤트는 공통 추적(assets/track.js)의 jjTrack으로 남긴다. 링크 클릭은 track.js가 알아서 남김.
+  function track(name, params) { if (window.jjTrack) window.jjTrack(name, params); }
   function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
   function statusCls(s) { return /운영/.test(s) ? "live" : /완료/.test(s) ? "done" : "wip"; }
   function fmt(d) { return d.length === 10 ? d.replace(/-/g, ".") : d.replace("-", "."); }
@@ -30,13 +32,14 @@
     var f = document.getElementById("filters");
     ["전체"].concat(d.categories).forEach(function (c) {
       var b = el("button", null, c); b.type = "button"; b.setAttribute("aria-pressed", c === state.cat);
-      b.onclick = function () { state.cat = c; f.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); grid(); };
+      b.onclick = function () { track("filter_projects", {category: c}); state.cat = c; f.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); grid(); };
       f.append(b);
     });
     function grid() {
       var g = document.getElementById("projects-grid"); g.replaceChildren();
       d.projects.filter(function (p) { return state.cat === "전체" || p.category === state.cat; }).forEach(function (p) {
-        var a = el("a", "pcard"); a.href = "project.html?p=" + p.id;
+        var a = el("a", "pcard"); a.href = "project.html?p=" + p.id; a.setAttribute("data-notrack", "");
+        a.addEventListener("click", function () { track("select_project", {project_id: p.id, project_category: p.category, filter: state.cat}); });
         var shot = el("div", "shot" + (p.shots && p.shots.length ? "" : " blank"));
         if (p.shots && p.shots.length) { var img = el("img"); img.src = p.shots[0].src; img.alt = p.shots[0].caption; img.loading = "lazy"; shot.append(img); }
         else shot.append(el("span", null, p.private ? "비공개 화면" : p.category));
@@ -57,7 +60,7 @@
     document.getElementById("archive-count").textContent = "프로젝트 " + d.projects.length + "개 · 기록 " + all.length + "개";
     var tl = document.getElementById("timeline"), more = document.getElementById("more");
     function tlRender() { tl.replaceChildren.apply(tl, archiveRows(all.slice(0, state.shown), true)); more.hidden = all.length <= state.shown; }
-    more.onclick = function () { state.shown += 20; tlRender(); };
+    more.onclick = function () { track("archive_more", {shown: state.shown}); state.shown += 20; tlRender(); };
     tlRender();
     document.getElementById("updated").textContent = "갱신 " + fmt(d.updated);
   }
@@ -66,6 +69,7 @@
     var id = new URLSearchParams(location.search).get("p"), p = find(d, id), root = document.getElementById("project");
     if (!p) { root.append(el("p", "note", "프로젝트를 찾지 못했어요.")); return; }
     document.title = p.title + " — jemmajeon";
+    track("view_project", {project_id: p.id, project_category: p.category, referrer_host: document.referrer ? new URL(document.referrer).host : "(direct)"});
     var head = el("header", "p-head");
     var back = el("a", "back", "← 전체 프로젝트"); back.href = "./#projects"; head.append(back);
     head.append(el("span", "cat", p.category + (p.since ? " · " + p.since + " ~" : "")), el("h1", null, p.title), el("p", "one", p.oneliner));

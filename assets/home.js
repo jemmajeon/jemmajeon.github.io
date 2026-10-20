@@ -65,7 +65,6 @@
     more.onclick = function () { track("archive_more", {shown: state.shown}); state.shown += 20; tlRender(); };
     tlRender();
     document.getElementById("updated").textContent = "갱신 " + fmt(d.updated);
-    if (pf.signoff) document.getElementById("bye").textContent = pf.signoff;
   }
 
   function project(d) {

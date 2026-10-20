@@ -114,5 +114,4 @@ mark{background:linear-gradient(transparent 58%,var(--mark) 58%,var(--mark) 92%,
 .note{font-size:14px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;padding:16px 18px}
 footer{margin:80px 0 40px;padding-top:20px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
 footer a{color:var(--muted)}
-footer .bye{font-family:var(--f-serif)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
